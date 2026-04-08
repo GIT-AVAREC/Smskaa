@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#128C7E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WhatsApp Clone">
+    
+    <title>WhatsApp</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #e5ddd5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app {
+            max-width: 500px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        
+        /* Header */
+        .header {
+            background: #128C7E;
+            color: white;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: 500;
+        }
+        
+        .header-icons {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .icon-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        /* Tabs */
+        .tabs {
+            background: #128C7E;
+            display: flex;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            text-transform: uppercase;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: white;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: white;
+        }
+        
+        /* Chat List */
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            background: white;
+        }
+        
+        .chat-item {
+            display: flex;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .chat-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #dfe5e7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .chat-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        
+        .chat-name {
+            font-weight: 600;
+            color: #111;
+            font-size: 16px;
+        }
+        
+        .chat-time {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .chat-message {
+            color: #666;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .chat-message .unread {
+            color: #128C7E;
+            font-weight: 600;
+        }
+        
+        /* FAB */
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #25D366;
+            color: white;
+            border: none;
+            font-size: 24px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Chat Screen */
+        .chat-screen {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #e5ddd5;
+            z-index: 100;
+        }
+        
+        .chat-screen.active {
+            display: flex;
+        }
+        
+        .chat-bg {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23e5ddd5" width="100" height="100"/><path fill="%23d1d7db" d="M0 0h100v100H0z" opacity="0.4"/></svg>');
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            position: relative;
+            word-wrap: break-word;
+        }
+        
+        .message.sent {
+            background: #dcf8c6;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+        
+        .message.received {
+            background: white;
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            text-align: right;
+            margin-top: 4px;
+        }
+        
+        .input-area {
+            background: #f0f0f0;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .message-input {
+            flex: 1;
+            border: none;
+            border-radius: 20px;
+            padding: 12px 16px;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #128C7E;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        
+        /* Auth Screen */
+        .auth-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: white;
+            padding: 20px;
+        }
+        
+        .auth-screen.hidden {
+            display: none;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: #25D366;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            margin-bottom: 30px;
+        }
+        
+        .auth-input {
+            width: 100%;
+            max-width: 300px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .auth-btn {
+            width: 100%;
+            max-width: 300px;
+            padding: 15px;
+            background: #128C7E;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .online-status {
+            width: 10px;
+            height: 10px;
+            background: #25D366;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Screen -->
+    <div class="auth-screen" id="authScreen">
+        <div class="logo">💬</div>
+        <h2 style="margin-bottom: 30px; color: #128C7E;">WhatsApp Clone</h2>
+        <input type="text" class="auth-input" id="usernameInput" placeholder="Введите ваше имя" maxlength="20">
+        <button class="auth-btn" onclick="enterApp()">Войти</button>
+    </div>
+
+    <!-- Main App -->
+    <div class="app" id="mainApp" style="display: none;">
+        <div class="header">
+            <div class="header-left">
+                <h1>WhatsApp</h1>
+            </div>
+            <div class="header-icons">
+                <button class="icon-btn">🔍</button>
+                <button class="icon-btn">⋮</button>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab">Звонки</div>
+            <div class="tab active">Чаты</div>
+            <div class="tab">Статус</div>
+        </div>
+        
+        <div class="chat-list" id="chatList">
+            <!-- Chats will be loaded here -->
+        </div>
+        
+        <button class="fab" onclick="startNewChat()">💬</button>
+    </div>
+
+    <!-- Chat Screen -->
+    <div class="chat-screen" id="chatScreen">
+        <div class="header">
+            <div class="header-left">
+                <button class="back-btn" onclick="closeChat()">←</button>
+                <div class="avatar" id="chatAvatar">👤</div>
+                <div>
+                    <div id="chatName">Имя</div>
+                    <div style="font-size: 12px; opacity: 0.8;">в сети</div>
+                </div>
+            </div>
+            <div class="header-icons">
+                <button class="icon-btn">📹</button>
+                <button class="icon-btn">📞</button>
+                <button class="icon-btn">⋮</button>
+            </div>
+        </div>
+        
+        <div class="chat-bg" id="messagesContainer">
+            <!-- Messages will appear here -->
+        </div>
+        
+        <div class="input-area">
+            <button class="icon-btn" style="color: #666;">😊</button>
+            <input type="text" class="message-input" id="messageInput" placeholder="Сообщение" onkeypress="handleKeyPress(event)">
+            <button class="send-btn" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBppttXdUhZ-BVV3XRyhaPMyWW_Lch2Jes",
+            authDomain: "dddd-8e287.firebaseapp.com",
+            projectId: "dddd-8e287",
+            storageBucket: "dddd-8e287.firebasestorage.app",
+            messagingSenderId: "678020145717",
+            appId: "1:678020145717:web:19bf8867df347a22cc477c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase available globally
+        window.db = db;
+        window.firestore = { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where };
+        
+        // Initialize app
+        window.enterApp = function() {
+            const username = document.getElementById('usernameInput').value.trim();
+            if (!username) return;
+            
+            localStorage.setItem('whatsapp_username', username);
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('mainApp').style.display = 'flex';
+            
+            loadChats();
+        };
+        
+        window.currentUser = localStorage.getItem('whatsapp_username') || '';
+        window.currentChat = null;
+        
+        // Load chats
+        window.loadChats = function() {
+            const chatList = document.getElementById('chatList');
+            const chats = [
+                { name: 'Общий чат', avatar: '🌐', lastMsg: 'Привет всем!', time: '12:30', unread: 3 },
+                { name: 'Поддержка', avatar: '🎧', lastMsg: 'Чем помочь?', time: 'Вчера', unread: 0 },
+                { name: 'Новости', avatar: '📰', lastMsg: 'Новое обновление', time: 'Пн', unread: 1 }
+            ];
+            
+            chatList.innerHTML = chats.map(chat => `
+                <div class="chat-item" onclick="openChat('${chat.name}', '${chat.avatar}')">
+                    <div class="avatar">${chat.avatar}</div>
+                    <div class="chat-info">
+                        <div class="chat-header">
+                            <span class="chat-name">${chat.name}</span>
+                            <span class="chat-time">${chat.time}</span>
+                        </div>
+                        <div class="chat-message ${chat.unread ? 'unread' : ''}">
+                            ${chat.unread ? '● ' : ''}${chat.lastMsg}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        };
+        
+        // Open chat
+        window.openChat = function(name, avatar) {
+            window.currentChat = name;
+            document.getElementById('chatName').textContent = name;
+            document.getElementById('chatAvatar').textContent = avatar;
+            document.getElementById('chatScreen').classList.add('active');
+            
+            loadMessages(name);
+        };
+        
+        // Close chat
+        window.closeChat = function() {
+            document.getElementById('chatScreen').classList.remove('active');
+            window.currentChat = null;
+        };
+        
+        // Load messages from Firebase
+        window.loadMessages = function(chatName) {
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '<div style="text-align: center; color: #999;">Загрузка...</div>';
+            
+            const q = query(
+                collection(db, 'messages'),
+                where('chat', '==', chatName),
+                orderBy('timestamp', 'asc')
+            );
+            
+            onSnapshot(q, (snapshot) => {
+                container.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const msg = doc.data();
+                    const isSent = msg.sender === window.currentUser;
+                    const time = msg.timestamp ? new Date(msg.timestamp.toDate()).toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'}) : '';
+                    
+                    container.innerHTML += `
+                        <div class="message ${isSent ? 'sent' : 'received'}">
+                            <div style="font-size: 12px; color: #128C7E; margin-bottom: 2px;">${msg.sender}</div>
+                            <div>${msg.text}</div>
+                            <div class="message-time">${time} ✓</div>
+                        </div>
+                    `;
+                });
+                container.scrollTop = container.scrollHeight;
+            });
+        };
+        
+        // Send message
+        window.sendMessage = async function() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (!text || !window.currentChat) return;
+            
+            try {
+                await addDoc(collection(db, 'messages'), {
+                    chat: window.currentChat,
+                    sender: window.currentUser,
+                    text: text,
+                    timestamp: serverTimestamp()
+                });
+                input.value = '';
+            } catch (e) {
+                console.error('Error sending:', e);
+                alert('Ошибка отправки сообщения');
+            }
+        };
+        
+        window.handleKeyPress = function(e) {
+            if (e.key === 'Enter') sendMessage();
+        };
+        
+        window.startNewChat = function() {
+            const name = prompt('Введите имя чата:');
+            if (name) openChat(name, '👤');
+        };
+        
+        // Check auth on load
+        if (window.currentUser) {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('mainApp').style.display = 'flex';
+            loadChats();
+        }
+    </script>
+    
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('SW registered'))
+                .catch(err => console.log('SW error', err));
+        }
+    </script>
+</body>
+</html>
