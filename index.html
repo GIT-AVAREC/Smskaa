@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#128C7E">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,32 +12,42 @@
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        html, body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #e5ddd5;
-            height: 100%;
-            overflow: hidden;
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .app {
-            max-width: 500px;
-            margin: 0 auto;
-            height: 100vh;
+        html, body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #e5ddd5;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            position: fixed;
+        }
+
+        #app {
+            max-width: 100%;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
             background: white;
+            position: relative;
         }
 
+        /* Header */
         .header {
             background: #128C7E;
             color: white;
-            padding: 10px 16px;
+            padding: 8px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
+            height: 56px;
         }
 
         .header-left { display: flex; align-items: center; gap: 15px; }
@@ -50,40 +60,72 @@
             color: white;
             font-size: 20px;
             cursor: pointer;
+            padding: 5px;
         }
 
+        /* Tabs */
         .tabs {
             background: #128C7E;
             display: flex;
-            color: rgba(255,255,255,0.8);
+            color: rgba(255,255,255,0.7);
             flex-shrink: 0;
+            height: 48px;
         }
 
         .tab {
             flex: 1;
-            padding: 12px;
+            padding: 12px 8px;
             text-align: center;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 500;
             text-transform: uppercase;
+            position: relative;
+            transition: all 0.3s;
         }
 
-        .tab.active { color: white; border-bottom: 3px solid white; }
+        .tab.active {
+            color: white;
+        }
 
-        .chat-list {
-            flex: 1;
-            overflow-y: auto;
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
             background: white;
         }
 
+        /* Content Area */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            background: white;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-content {
+            display: none;
+            height: 100%;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Chat List */
         .chat-item {
             display: flex;
             padding: 12px 16px;
             border-bottom: 1px solid #f0f0f0;
             cursor: pointer;
+            transition: background 0.2s;
         }
 
-        .chat-item:hover { background: #f5f5f5; }
+        .chat-item:hover, .chat-item:active { background: #f5f5f5; }
 
         .avatar {
             width: 50px;
@@ -93,22 +135,130 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 24px;
             margin-right: 15px;
+            flex-shrink: 0;
         }
 
-        .chat-info { flex: 1; }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .chat-info { 
+            flex: 1; 
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
         .chat-header {
             display: flex;
             justify-content: space-between;
             margin-bottom: 4px;
+            align-items: center;
         }
 
         .chat-name { font-weight: 600; color: #111; font-size: 16px; }
-        .chat-time { color: #999; font-size: 12px; }
-        .chat-message { color: #666; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chat-time { color: #999; font-size: 12px; flex-shrink: 0; }
+        .chat-message { 
+            color: #666; 
+            font-size: 14px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis;
+        }
+        .chat-message.unread { color: #128C7E; font-weight: 500; }
 
+        .unread-badge {
+            background: #128C7E;
+            color: white;
+            border-radius: 50%;
+            min-width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        /* Status Styles */
+        .status-item {
+            display: flex;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            align-items: center;
+        }
+
+        .status-avatar {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: #dfe5e7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-right: 15px;
+            position: relative;
+            border: 3px solid #128C7E;
+            flex-shrink: 0;
+        }
+
+        .status-avatar.seen { border-color: #ccc; }
+
+        .add-status-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #128C7E;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border: 2px solid white;
+        }
+
+        .my-status .status-avatar { border-color: #ccc; }
+
+        /* Calls Styles */
+        .call-item {
+            display: flex;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            align-items: center;
+        }
+
+        .call-icon {
+            font-size: 20px;
+            margin-right: 15px;
+            color: #128C7E;
+        }
+
+        .call-icon.missed { color: #e74c3c; transform: rotate(135deg); }
+
+        .call-info { flex: 1; }
+        .call-name { font-weight: 600; color: #111; font-size: 16px; }
+        .call-details { color: #666; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        .call-time { color: #999; font-size: 12px; }
+
+        .call-btn {
+            color: #128C7E;
+            font-size: 22px;
+            padding: 10px;
+        }
+
+        /* FAB */
         .fab {
             position: fixed;
             bottom: 20px;
@@ -120,35 +270,40 @@
             color: white;
             border: none;
             font-size: 24px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             z-index: 50;
         }
 
-        /* Chat Screen - Fixed Layout */
+        .fab.calls { bottom: 90px; }
+
+        /* Chat Screen */
         .chat-screen {
             display: none;
             flex-direction: column;
-            height: 100vh;
+            height: 100%;
+            width: 100%;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
             background: #e5ddd5;
             z-index: 100;
         }
 
         .chat-screen.active { display: flex; }
 
-        .chat-header-bar {
+        .chat-header {
             background: #128C7E;
             color: white;
-            padding: 10px 16px;
+            padding: 8px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
+            height: 56px;
         }
 
         .chat-header-left { display: flex; align-items: center; gap: 10px; }
@@ -159,6 +314,7 @@
             color: white;
             font-size: 24px;
             cursor: pointer;
+            padding: 5px;
         }
 
         .chat-avatar {
@@ -172,28 +328,29 @@
             font-size: 20px;
         }
 
+        .chat-title-info { display: flex; flex-direction: column; }
         .chat-title { font-size: 16px; font-weight: 500; }
-        .chat-status { font-size: 12px; opacity: 0.8; }
+        .chat-status { font-size: 12px; opacity: 0.9; }
 
         .chat-header-icons { display: flex; gap: 15px; }
 
-        .chat-header-icons .icon-btn { font-size: 18px; }
-
-        /* Messages Area */
+        /* Messages */
         .messages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23e5ddd5" width="100" height="100"/><path fill="%23d1d7db" d="M0 0h100v100H0z" opacity="0.4"/></svg>');
+            padding: 20px 16px;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23e5ddd5" width="100" height="100"/><path fill="%23d1d7db" d="M0 0h100v100H0z" opacity="0.3"/></svg>');
+            -webkit-overflow-scrolling: touch;
         }
 
         .message {
-            max-width: 80%;
+            max-width: 85%;
             padding: 8px 12px;
             margin-bottom: 8px;
             border-radius: 8px;
             word-wrap: break-word;
             position: relative;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
         }
 
         .message.sent {
@@ -208,46 +365,56 @@
             border-bottom-left-radius: 0;
         }
 
-        .message-sender { font-size: 12px; color: #128C7E; margin-bottom: 2px; }
-        .message-text { font-size: 15px; color: #111; }
+        .message-sender { font-size: 12px; color: #128C7E; margin-bottom: 2px; font-weight: 500; }
+        .message-text { font-size: 15px; color: #111; line-height: 1.4; }
         .message-time { font-size: 11px; color: #999; text-align: right; margin-top: 4px; }
 
-        .loading, .empty-state {
+        .empty-state, .loading {
             text-align: center;
-            color: #999;
+            color: #666;
             padding: 40px 20px;
             font-size: 14px;
         }
 
         /* Input Area - Fixed at Bottom */
-        .input-area {
+        .input-container {
             background: #f0f0f0;
-            padding: 10px 15px;
+            padding: 8px 10px;
             display: flex;
-            align-items: center;
-            gap: 10px;
+            align-items: flex-end;
+            gap: 8px;
             flex-shrink: 0;
             border-top: 1px solid #ddd;
-            min-height: 60px;
+            padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
         }
 
-        .emoji-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 5px;
+        .input-wrapper {
+            flex: 1;
+            background: white;
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            min-height: 44px;
         }
 
         .message-input {
             flex: 1;
             border: none;
-            border-radius: 20px;
-            padding: 12px 16px;
-            font-size: 16px;
             outline: none;
-            background: white;
-            min-height: 44px;
+            font-size: 16px;
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+
+        .input-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            flex-shrink: 0;
         }
 
         .send-btn {
@@ -273,14 +440,13 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            height: 100%;
+            width: 100%;
             background: white;
             padding: 20px;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
             z-index: 200;
         }
 
@@ -318,71 +484,249 @@
             border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
+            font-weight: 500;
         }
 
         .error-msg { color: #e74c3c; margin-top: 10px; font-size: 14px; }
+
+        /* Section Headers */
+        .section-header {
+            padding: 16px;
+            color: #128C7E;
+            font-size: 13px;
+            text-transform: uppercase;
+            font-weight: 600;
+            background: white;
+        }
+
+        /* Call Screen */
+        .call-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #1a1a2e;
+            z-index: 150;
+            color: white;
+        }
+
+        .call-screen.active { display: flex; }
+
+        .call-info-large {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .call-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .call-name-large { font-size: 24px; font-weight: 500; margin-bottom: 10px; }
+        .call-status-large { font-size: 16px; opacity: 0.8; }
+
+        .call-actions {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 40px;
+            padding-bottom: calc(40px + env(safe-area-inset-bottom, 20px));
+        }
+
+        .call-action-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        .call-action-btn.mute { background: #333; color: white; }
+        .call-action-btn.speaker { background: #333; color: white; }
+        .call-action-btn.end { background: #e74c3c; color: white; }
+
+        /* Status Viewer */
+        .status-viewer {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #000;
+            z-index: 160;
+            color: white;
+        }
+
+        .status-viewer.active { display: flex; }
+
+        .status-progress {
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            margin: 10px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .status-progress-bar {
+            height: 100%;
+            background: white;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .status-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .status-nav {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            cursor: pointer;
+        }
+
+        .status-nav.prev { left: 0; }
+        .status-nav.next { right: 0; }
     </style>
 </head>
 <body>
-    <!-- Auth Screen -->
-    <div class="auth-screen" id="authScreen">
-        <div class="logo">💬</div>
-        <h2 style="margin-bottom: 30px; color: #128C7E;">WhatsApp Clone</h2>
-        <input type="text" class="auth-input" id="usernameInput" placeholder="Введите ваше имя" maxlength="20">
-        <button class="auth-btn" onclick="enterApp()">Войти</button>
-        <div id="authError" class="error-msg"></div>
-    </div>
+    <div id="app">
+        <!-- Auth Screen -->
+        <div class="auth-screen" id="authScreen">
+            <div class="logo">💬</div>
+            <h2 style="margin-bottom: 30px; color: #128C7E;">WhatsApp Clone</h2>
+            <input type="text" class="auth-input" id="usernameInput" placeholder="Введите ваше имя" maxlength="20">
+            <button class="auth-btn" onclick="enterApp()">Войти</button>
+            <div id="authError" class="error-msg"></div>
+        </div>
 
-    <!-- Main App -->
-    <div class="app" id="mainApp" style="display: none;">
+        <!-- Main App -->
         <div class="header">
             <div class="header-left">
                 <h1>WhatsApp</h1>
             </div>
             <div class="header-icons">
-                <button class="icon-btn">🔍</button>
-                <button class="icon-btn">⋮</button>
+                <button class="icon-btn" onclick="search()">🔍</button>
+                <button class="icon-btn" onclick="menu()">⋮</button>
             </div>
         </div>
 
         <div class="tabs">
-            <div class="tab">Звонки</div>
-            <div class="tab active">Чаты</div>
-            <div class="tab">Статус</div>
+            <div class="tab" onclick="switchTab('calls')">Звонки</div>
+            <div class="tab active" onclick="switchTab('chats')">Чаты</div>
+            <div class="tab" onclick="switchTab('status')">Статус</div>
         </div>
 
-        <div class="chat-list" id="chatList"></div>
+        <div class="content">
+            <!-- Chats Tab -->
+            <div class="tab-content active" id="chats-tab">
+                <div id="chatList"></div>
+            </div>
 
-        <button class="fab" onclick="startNewChat()">💬</button>
+            <!-- Status Tab -->
+            <div class="tab-content" id="status-tab">
+                <div class="section-header">Мой статус</div>
+                <div class="status-item my-status" onclick="addStatus()">
+                    <div class="status-avatar">👤<div class="add-status-btn">+</div></div>
+                    <div class="chat-info">
+                        <div class="chat-name">Мой статус</div>
+                        <div class="chat-message">Нажмите, чтобы добавить статус</div>
+                    </div>
+                </div>
+                <div class="section-header">Недавние обновления</div>
+                <div id="statusList"></div>
+            </div>
+
+            <!-- Calls Tab -->
+            <div class="tab-content" id="calls-tab">
+                <div id="callsList"></div>
+            </div>
+        </div>
+
+        <button class="fab" id="mainFab" onclick="fabAction()">💬</button>
     </div>
 
     <!-- Chat Screen -->
     <div class="chat-screen" id="chatScreen">
-        <div class="chat-header-bar">
+        <div class="chat-header">
             <div class="chat-header-left">
                 <button class="back-btn" onclick="closeChat()">←</button>
                 <div class="chat-avatar" id="chatAvatar">👤</div>
-                <div>
+                <div class="chat-title-info">
                     <div class="chat-title" id="chatName">Имя</div>
                     <div class="chat-status">в сети</div>
                 </div>
             </div>
             <div class="chat-header-icons">
-                <button class="icon-btn">📹</button>
-                <button class="icon-btn">📞</button>
+                <button class="icon-btn" onclick="videoCall()">📹</button>
+                <button class="icon-btn" onclick="voiceCall()">📞</button>
                 <button class="icon-btn">⋮</button>
             </div>
         </div>
 
         <div class="messages-container" id="messagesContainer">
-            <div class="empty-state">Загрузка сообщений...</div>
+            <div class="loading">Загрузка сообщений...</div>
         </div>
 
-        <div class="input-area">
-            <button class="emoji-btn">😊</button>
-            <input type="text" class="message-input" id="messageInput" placeholder="Сообщение" onkeypress="handleKeyPress(event)">
+        <div class="input-container">
+            <button class="input-btn" onclick="showEmoji()">😊</button>
+            <div class="input-wrapper">
+                <input type="text" class="message-input" id="messageInput" placeholder="Сообщение" onkeypress="handleKeyPress(event)">
+            </div>
+            <button class="input-btn" onclick="attachFile()">📎</button>
             <button class="send-btn" onclick="sendMessage()">➤</button>
         </div>
+    </div>
+
+    <!-- Call Screen -->
+    <div class="call-screen" id="callScreen">
+        <div class="call-info-large">
+            <div class="call-avatar-large" id="callAvatar">👤</div>
+            <div class="call-name-large" id="callName">Имя</div>
+            <div class="call-status-large" id="callStatus">Звонок...</div>
+        </div>
+        <div class="call-actions">
+            <button class="call-action-btn mute" onclick="toggleMute()">🎤</button>
+            <button class="call-action-btn speaker" onclick="toggleSpeaker()">🔊</button>
+            <button class="call-action-btn end" onclick="endCall()">📞</button>
+        </div>
+    </div>
+
+    <!-- Status Viewer -->
+    <div class="status-viewer" id="statusViewer">
+        <div class="status-progress">
+            <div class="status-progress-bar" id="statusProgress"></div>
+        </div>
+        <div class="status-content" id="statusContent"></div>
+        <div class="status-nav prev" onclick="prevStatus()"></div>
+        <div class="status-nav next" onclick="nextStatus()"></div>
     </div>
 
     <!-- Firebase SDK -->
@@ -413,8 +757,11 @@
         window.db = db;
         window.currentUser = localStorage.getItem('whatsapp_username') || '';
         window.currentChat = null;
+        window.currentTab = 'chats';
         let unsubscribeMessages = null;
+        let callTimer = null;
 
+        // Auth
         window.enterApp = function() {
             const username = document.getElementById('usernameInput').value.trim();
             if (!username) {
@@ -425,17 +772,37 @@
             localStorage.setItem('whatsapp_username', username);
             window.currentUser = username;
             document.getElementById('authScreen').classList.add('hidden');
-            document.getElementById('mainApp').style.display = 'flex';
             loadChats();
+            loadStatus();
+            loadCalls();
         };
 
+        // Tab Switching
+        window.switchTab = function(tab) {
+            window.currentTab = tab;
+
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+
+            const fab = document.getElementById('mainFab');
+            if (tab === 'chats') fab.textContent = '💬';
+            else if (tab === 'status') fab.textContent = '📷';
+            else if (tab === 'calls') fab.textContent = '📞';
+        };
+
+        // Load Chats
         window.loadChats = function() {
             const chatList = document.getElementById('chatList');
 
             const chats = [
                 { id: 'support', name: 'Поддержка', avatar: '🎧', lastMsg: 'Чем помочь?', time: '14:10', unread: 1 },
                 { id: 'general', name: 'Общий чат', avatar: '🌐', lastMsg: 'Привет всем!', time: '12:30', unread: 3 },
-                { id: 'news', name: 'Новости', avatar: '📰', lastMsg: 'Новое обновление', time: 'Вчера', unread: 0 }
+                { id: 'news', name: 'Новости', avatar: '📰', lastMsg: 'Новое обновление', time: 'Вчера', unread: 0 },
+                { id: 'family', name: 'Семья', avatar: '👨‍👩‍👧', lastMsg: 'Ужин в 19:00', time: '10:15', unread: 0 },
+                { id: 'work', name: 'Работа', avatar: '💼', lastMsg: 'Отчёт готов', time: 'Пн', unread: 2 }
             ];
 
             chatList.innerHTML = chats.map(chat => `
@@ -450,65 +817,111 @@
                             ${chat.unread ? '<b>●</b> ' : ''}${chat.lastMsg}
                         </div>
                     </div>
+                    ${chat.unread ? `<div class="unread-badge">${chat.unread}</div>` : ''}
                 </div>
             `).join('');
         };
 
+        // Load Status
+        window.loadStatus = function() {
+            const statusList = document.getElementById('statusList');
+
+            const statuses = [
+                { name: 'Анна', avatar: '👩', time: '10 минут назад', text: 'Привет всем! 🌟', seen: false },
+                { name: 'Мама', avatar: '👩‍🦱', time: '25 минут назад', text: 'На даче', seen: false },
+                { name: 'Папа', avatar: '👨', time: '1 час назад', text: 'Работаю', seen: true },
+                { name: 'Коллега', avatar: '👨‍💼', time: '2 часа назад', text: 'Новый проект!', seen: true }
+            ];
+
+            statusList.innerHTML = statuses.map(s => `
+                <div class="status-item" onclick="viewStatus('${s.name}', '${s.avatar}', '${s.text}')">
+                    <div class="status-avatar ${s.seen ? 'seen' : ''}">${s.avatar}</div>
+                    <div class="chat-info">
+                        <div class="chat-name">${s.name}</div>
+                        <div class="chat-message">${s.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        // Load Calls
+        window.loadCalls = function() {
+            const callsList = document.getElementById('callsList');
+
+            const calls = [
+                { name: 'Мама', avatar: '👩‍🦱', type: 'incoming', time: 'Сегодня, 12:30', duration: '5:23', missed: false },
+                { name: 'Работа', avatar: '💼', type: 'outgoing', time: 'Сегодня, 10:15', duration: '12:45', missed: false },
+                { name: 'Неизвестный', avatar: '❓', type: 'missed', time: 'Вчера, 18:20', duration: '', missed: true },
+                { name: 'Поддержка', avatar: '🎧', type: 'incoming', time: 'Вчера, 14:00', duration: '3:10', missed: false }
+            ];
+
+            callsList.innerHTML = calls.map(c => `
+                <div class="call-item" onclick="callBack('${c.name}', '${c.avatar}')">
+                    <div class="avatar">${c.avatar}</div>
+                    <div class="call-info">
+                        <div class="call-name">${c.name}</div>
+                        <div class="call-details">
+                            <span class="call-icon ${c.missed ? 'missed' : ''}">
+                                ${c.type === 'incoming' ? '↙' : c.type === 'outgoing' ? '↗' : '✕'}
+                            </span>
+                            <span>${c.time}${c.duration ? ', ' + c.duration : ''}</span>
+                        </div>
+                    </div>
+                    <button class="call-btn">📞</button>
+                </div>
+            `).join('');
+        };
+
+        // Chat Functions
         window.openChat = function(chatId, name, avatar) {
             window.currentChat = chatId;
             document.getElementById('chatName').textContent = name;
             document.getElementById('chatAvatar').textContent = avatar;
+            document.getElementById('callAvatar').textContent = avatar;
+            document.getElementById('callName').textContent = name;
             document.getElementById('chatScreen').classList.add('active');
             document.getElementById('messagesContainer').innerHTML = '<div class="loading">Загрузка...</div>';
 
-            if (unsubscribeMessages) {
-                unsubscribeMessages();
-            }
+            if (unsubscribeMessages) unsubscribeMessages();
 
-            try {
-                const messagesRef = collection(db, 'chats', chatId, 'messages');
-                const q = query(messagesRef, orderBy('timestamp', 'asc'));
+            const messagesRef = collection(db, 'chats', chatId, 'messages');
+            const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
-                unsubscribeMessages = onSnapshot(q, (snapshot) => {
-                    const container = document.getElementById('messagesContainer');
+            unsubscribeMessages = onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('messagesContainer');
 
-                    if (snapshot.empty) {
-                        container.innerHTML = '<div class="empty-state">Нет сообщений. Напишите первое!</div>';
-                        return;
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="empty-state">Нет сообщений. Напишите первое!</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+
+                snapshot.forEach((doc) => {
+                    const msg = doc.data();
+                    const isSent = msg.sender === window.currentUser;
+
+                    let timeStr = '';
+                    if (msg.timestamp && msg.timestamp.toDate) {
+                        const date = msg.timestamp.toDate();
+                        timeStr = date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
                     }
 
-                    container.innerHTML = '';
-
-                    snapshot.forEach((doc) => {
-                        const msg = doc.data();
-                        const isSent = msg.sender === window.currentUser;
-
-                        let timeStr = '';
-                        if (msg.timestamp && msg.timestamp.toDate) {
-                            const date = msg.timestamp.toDate();
-                            timeStr = date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
-                        }
-
-                        const msgDiv = document.createElement('div');
-                        msgDiv.className = `message ${isSent ? 'sent' : 'received'}`;
-                        msgDiv.innerHTML = `
-                            ${!isSent ? `<div class="message-sender">${escapeHtml(msg.sender)}</div>` : ''}
-                            <div class="message-text">${escapeHtml(msg.text)}</div>
-                            <div class="message-time">${timeStr} ${isSent ? '✓✓' : ''}</div>
-                        `;
-                        container.appendChild(msgDiv);
-                    });
-
-                    container.scrollTop = container.scrollHeight;
-                }, (error) => {
-                    console.error('Error:', error);
-                    document.getElementById('messagesContainer').innerHTML = 
-                        `<div class="empty-state">Ошибка загрузки: ${error.message}</div>`;
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+                    msgDiv.innerHTML = `
+                        ${!isSent ? `<div class="message-sender">${escapeHtml(msg.sender)}</div>` : ''}
+                        <div class="message-text">${escapeHtml(msg.text)}</div>
+                        <div class="message-time">${timeStr} ${isSent ? '✓✓' : ''}</div>
+                    `;
+                    container.appendChild(msgDiv);
                 });
 
-            } catch (error) {
-                console.error('Error:', error);
-            }
+                container.scrollTop = container.scrollHeight;
+            }, (error) => {
+                document.getElementById('messagesContainer').innerHTML = 
+                    `<div class="empty-state">Ошибка: ${error.message}</div>`;
+            });
         };
 
         window.closeChat = function() {
@@ -525,24 +938,16 @@
             const text = input.value.trim();
 
             if (!text || !window.currentChat) return;
-            if (!window.currentUser) {
-                alert('Ошибка: не авторизован');
-                return;
-            }
+            if (!window.currentUser) { alert('Ошибка: не авторизован'); return; }
 
             try {
-                const messagesRef = collection(db, 'chats', window.currentChat, 'messages');
-
-                await addDoc(messagesRef, {
+                await addDoc(collection(db, 'chats', window.currentChat, 'messages'), {
                     sender: window.currentUser,
                     text: text,
                     timestamp: serverTimestamp()
                 });
-
                 input.value = '';
-
             } catch (error) {
-                console.error('Error sending:', error);
                 alert('Ошибка отправки: ' + error.message);
             }
         };
@@ -551,28 +956,177 @@
             if (e.key === 'Enter') sendMessage();
         };
 
-        window.startNewChat = function() {
-            const name = prompt('Введите имя чата:');
-            if (name) {
-                const id = 'chat_' + Date.now();
-                openChat(id, name, '👤');
+        // Call Functions
+        window.voiceCall = function() {
+            document.getElementById('callScreen').classList.add('active');
+            document.getElementById('callStatus').textContent = 'Звонок...';
+
+            // Имитация ответа через 3 секунды
+            setTimeout(() => {
+                document.getElementById('callStatus').textContent = '00:00';
+                let seconds = 0;
+                callTimer = setInterval(() => {
+                    seconds++;
+                    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+                    const secs = (seconds % 60).toString().padStart(2, '0');
+                    document.getElementById('callStatus').textContent = `${mins}:${secs}`;
+                }, 1000);
+            }, 3000);
+        };
+
+        window.videoCall = function() {
+            document.getElementById('callScreen').classList.add('active');
+            document.getElementById('callStatus').textContent = 'Видеозвонок...';
+
+            setTimeout(() => {
+                document.getElementById('callStatus').textContent = '00:00';
+                let seconds = 0;
+                callTimer = setInterval(() => {
+                    seconds++;
+                    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+                    const secs = (seconds % 60).toString().padStart(2, '0');
+                    document.getElementById('callStatus').textContent = `${mins}:${secs}`;
+                }, 1000);
+            }, 3000);
+        };
+
+        window.endCall = function() {
+            if (callTimer) {
+                clearInterval(callTimer);
+                callTimer = null;
+            }
+            document.getElementById('callScreen').classList.remove('active');
+        };
+
+        window.toggleMute = function() {
+            event.target.textContent = event.target.textContent === '🎤' ? '🎤' : '🎤';
+        };
+
+        window.toggleSpeaker = function() {
+            event.target.textContent = event.target.textContent === '🔊' ? '🔈' : '🔊';
+        };
+
+        window.callBack = function(name, avatar) {
+            document.getElementById('callAvatar').textContent = avatar;
+            document.getElementById('callName').textContent = name;
+            voiceCall();
+        };
+
+        // Status Functions
+        let currentStatusIndex = 0;
+        let statusTimer = null;
+        const statuses = [
+            { name: 'Анна', text: 'Привет всем! 🌟' },
+            { name: 'Мама', text: 'На даче 🌻' },
+            { name: 'Папа', text: 'Работаю 💼' }
+        ];
+
+        window.viewStatus = function(name, avatar, text) {
+            currentStatusIndex = statuses.findIndex(s => s.name === name) || 0;
+            showCurrentStatus();
+        };
+
+        window.showCurrentStatus = function() {
+            const s = statuses[currentStatusIndex];
+            document.getElementById('statusContent').innerHTML = `
+                <div style="font-size: 60px; margin-bottom: 20px;">👤</div>
+                <div style="font-size: 18px; opacity: 0.8; margin-bottom: 10px;">${s.name}</div>
+                <div>${s.text}</div>
+            `;
+            document.getElementById('statusViewer').classList.add('active');
+
+            // Progress bar animation
+            let progress = 0;
+            document.getElementById('statusProgress').style.width = '0%';
+
+            if (statusTimer) clearInterval(statusTimer);
+            statusTimer = setInterval(() => {
+                progress += 2;
+                document.getElementById('statusProgress').style.width = progress + '%';
+                if (progress >= 100) {
+                    nextStatus();
+                }
+            }, 100);
+        };
+
+        window.nextStatus = function() {
+            currentStatusIndex++;
+            if (currentStatusIndex >= statuses.length) {
+                closeStatus();
+            } else {
+                showCurrentStatus();
             }
         };
 
+        window.prevStatus = function() {
+            if (currentStatusIndex > 0) {
+                currentStatusIndex--;
+                showCurrentStatus();
+            }
+        };
+
+        window.closeStatus = function() {
+            if (statusTimer) clearInterval(statusTimer);
+            document.getElementById('statusViewer').classList.remove('active');
+        };
+
+        window.addStatus = function() {
+            const text = prompt('Введите текст статуса:');
+            if (text) {
+                alert('Статус добавлен: ' + text);
+                loadStatus();
+            }
+        };
+
+        // FAB Action
+        window.fabAction = function() {
+            if (window.currentTab === 'chats') {
+                const name = prompt('Введите имя чата:');
+                if (name) openChat('chat_' + Date.now(), name, '👤');
+            } else if (window.currentTab === 'status') {
+                addStatus();
+            } else if (window.currentTab === 'calls') {
+                const name = prompt('Кому позвонить?');
+                if (name) {
+                    document.getElementById('callAvatar').textContent = '👤';
+                    document.getElementById('callName').textContent = name;
+                    voiceCall();
+                }
+            }
+        };
+
+        // Utility
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
+        window.search = function() {
+            alert('Поиск (в разработке)');
+        };
+
+        window.menu = function() {
+            alert('Меню (в разработке)');
+        };
+
+        window.showEmoji = function() {
+            alert('Эмодзи (в разработке)');
+        };
+
+        window.attachFile = function() {
+            alert('Прикрепить файл (в разработке)');
+        };
+
+        // Init
         if (window.currentUser) {
             document.getElementById('authScreen').classList.add('hidden');
-            document.getElementById('mainApp').style.display = 'flex';
             loadChats();
+            loadStatus();
+            loadCalls();
         }
-    </script>
 
-    <script>
+        // Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
                 .then(reg => console.log('SW registered'))
